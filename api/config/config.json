@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": null,
+    "password": null,
+    "database": "nyc-buildings-api",
+    "dialect": "postgres",
+    "host":"localhost"
+  }
+}

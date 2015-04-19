@@ -1,0 +1,14 @@
+{
+  "name": "nyc-buildings-api",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "pg": "^4.3.0",
+    "pg-hstore": "^2.3.2",
+    "restify": "^3.0.2",
+    "sequelize": "^2.0.6",
+    "sequelize-cli": "^1.7.0"
+  },
+  "private": true
+}
