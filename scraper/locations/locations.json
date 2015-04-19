@@ -1,20 +1,135 @@
-
 {
-	"endpoints":[
+	"endpoints": [
 		{
-			"root" : "http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?",
+			"root": "http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?",
 			"paths": [
 				{
-					"name": "boro=*&houseno=*&street=*|bin=*",
+					"name": "boro=*&houseno=*&street=*|bin=*|boro=*&block=*&lot=*",
 					"items": [
 						{
-							"name":"",
-							"location" : "body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td:nth-child(1)",
+							"name": "health_area",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(6)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "census_tract",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(6)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "community_board",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(6)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "buildings_on_lot",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(5) > td:nth-child(6)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "tax_block",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(9)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "tax_lot",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(3) > td:nth-child(9)",
+							"regex": "(\\d+)"
+						},
+						{
+							"name": "condo",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(9)",
+							"regex": ": (.*)"
+						},
+						{
+							"name": "vacant",
+							"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(5) > td:nth-child(9)",
+							"regex": ": (.*)"
+						},
+						{
+							"name": "cross_streets",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(3) > td:nth-child(2)",
 							"regex": ""
-						},{
-							"name": "bin",
-							"location" : "body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td:nth-child(3)",
-							"regex":"BIN# (\\d*)"
+						},
+						{
+							"name": "dob_special_place_name",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "dob_building_remarks",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "landmark_status",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(6) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "local_law",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(7) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "environmental_restrictions",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(10) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "legal_adult_use",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(11) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "loft_law",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(7) > td:nth-child(4)",
+							"regex": ""
+						},
+						{
+							"name": "special_status",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(6) > td:nth-child(4)",
+							"regex": ""
+						},
+						{
+							"name": "city_owned",
+							"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(11) > td:nth-child(4)",
+							"regex": ""
+						},
+						{
+							"name": "special_district",
+							"location": "body > center > table:nth-child(6) > tbody > tr:nth-child(2) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "complaints_total",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(2) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "complaints_open",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(2) > td:nth-child(3)",
+							"regex": ""
+						},
+						{
+							"name": "violations_dob_total",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(3) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "violations_dob_open",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(3) > td:nth-child(3)",
+							"regex": ""
+						},
+						{
+							"name": "violations_ecb_total",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(4) > td:nth-child(2)",
+							"regex": ""
+						},
+						{
+							"name": "violations_ecb_open",
+							"location": "body > center > table:nth-child(8) > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(4) > td:nth-child(3)",
+							"regex": ""
 						}
 					]
 				}

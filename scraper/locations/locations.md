@@ -13,7 +13,7 @@ In each path:
 ### Go conversion
 Use [gojson](https://github.com/ChimeraCoder/gojson) to convert json file into Go struct. 
 ```
-cat locations.json > gojson
+cat locations.json | gojson
 ```
 Output:
 ```go
