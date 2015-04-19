@@ -1,0 +1,46 @@
+# Api Endpoints
+
+## Glossary
+bin = Building Identification Number
+ern = Elevator Record Number
+
+## Endpoints
+/bin/{params}
+	Accepted Params: borough house_number street block lot address
+	
+	Returns the bin for a given address. Accepted param combinations are:
+		borough & house_number & street
+		borough & block & lot
+		address
+	
+	The first two options map directly to BIS query parmeters. If you use
+	the address option we will try and geocode your inputted address and 
+	it to the required BIS values. 
+
+/building/{bin}
+	Returns information about a given building, along with endpoints and
+	ids for accessing other resources related to this building
+
+/building/{bin}/elevators
+	Returns all available information about this building's elevators
+
+/elevator/{ern}
+	Returns information about
+
+
+WIP
+
+Other options:
+Complaints
+Violations-DOB
+Violations-ECB
+Jobs
+ARA/LAA jobs
+Actions
+Total Jobs
+Electrical applications
+Permits in process
+Illuminated signs
+Plumbing inspections
+Open plumbing jobs
+Facades
