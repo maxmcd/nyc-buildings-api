@@ -1,0 +1,24 @@
+
+{
+	"endpoints":[
+		{
+			"root" : "http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?",
+			"paths": [
+				{
+					"name": "boro=*&houseno=*&street=*|bin=*",
+					"items": [
+						{
+							"name":"",
+							"location" : "body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td:nth-child(1)",
+							"regex": ""
+						},{
+							"name": "bin",
+							"location" : "body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td:nth-child(3)",
+							"regex":"BIN# (\\d*)"
+						}
+					]
+				}
+			]
+		}
+	]
+}
