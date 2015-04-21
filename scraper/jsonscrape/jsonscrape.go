@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/goamz/s3"
 )
 
 type Locations struct {
@@ -42,6 +44,15 @@ type Output struct {
 	Columns map[string]string
 }
 
+/*
+Returns urls from a page that need to be scraped
+Takes the document and an array of items. Looks
+for the "location" or regex match of each item
+and then extracts its href and calculates its
+absolute url.
+
+A list of urls to scrape is returned.
+*/
 func ReturnUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
 	for _, item := range items {
@@ -51,21 +62,45 @@ func ReturnUrlsFromDoc(doc *goquery.Document, items []Items) (
 				parseUrl, err := url.Parse(href)
 				if err != nil {
 					log.Println(err)
+				} else {
+					href = doc.Url.ResolveReference(parseUrl).String()
+					urls = append(urls, href)
 				}
-
-				href = doc.Url.ResolveReference(parseUrl).String()
-				urls = append(urls, href)
 			}
 		})
 	}
 	return
 }
+
+/*
+TODO
+The NYC bis uses forms for some links. This function
+parses the form inputs and generates the necessary
+url string to follow.
+*/
 func ReturnFormUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
 
 	return
 }
 
+/*
+Recursive page parsing function. Takes a slice of
+directives and the page.
+
+Looks for three type of directives. "links" for a
+directive that returns links that need to be
+scraped. "form" for a directive that returns links
+calculated from forms. "scrape" the most common
+directive, that simply returns values scraped from
+a page.
+
+Any urls created from the first two directive are
+passed to the GetOutputFromUrl, which calls this
+function to grab the necessary output. This
+operation will be repeated recursively until all
+outputs are generated and returned.
+*/
 func ParseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (outputs []Output) {
 	for _, directive := range directives {
 
@@ -119,11 +154,15 @@ func GetOutputFromUrl(url string) (outputs []Output, err error) {
 			break
 		}
 	}
-
 	doc, err := goquery.NewDocumentFromResponse(resp)
 	if err != nil {
 		log.Println(err)
 		return
+	}
+
+	err = ArchivePageToS3(doc)
+	if err != nil {
+		log.Println(err)
 	}
 	locations, err := ParseLocations("../locations/locations.json")
 	if err != nil {
@@ -143,7 +182,6 @@ func ReturnTableValuesFromDoc(doc *goquery.Document, items []Items) (
 	values = make(map[string]string)
 
 	for _, item := range items {
-		fmt.Println(item.Location)
 		text := doc.Find(item.Location).Text()
 		text = strings.TrimSpace(text)
 
@@ -222,6 +260,32 @@ func prepareStringForRegex(input string) string {
 	return input
 }
 
-func main() {
+func ArchivePageToS3(doc *goquery.Document) error {
 
+	auth, err := aws.EnvAuth()
+	if err != nil {
+		return err
+	}
+
+	client := s3.New(auth, aws.USEast)
+	bucket := client.Bucket("nycb-api")
+	html, err := doc.Html()
+	if err != nil {
+		return err
+	}
+
+	timestamp := time.Now().UnixNano()
+	url := doc.Url.Host + doc.Url.RequestURI()
+	fmt.Printf("%d, %s\n", timestamp, url)
+	err = bucket.Put(
+		fmt.Sprintf("%s/%d", url, timestamp),
+		[]byte(html),
+		"text/html",
+		s3.AuthenticatedRead,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

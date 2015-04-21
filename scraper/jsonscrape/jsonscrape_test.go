@@ -1,6 +1,7 @@
 package jsonscrape
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -71,19 +72,23 @@ var (
 func TestGetOutputFromUrl(t *testing.T) {
 	outputs, err := GetOutputFromUrl(lex88compl)
 	fmt.Println(outputs, err)
-	// testJson := make(map[string]string)
-	// err = json.Unmarshal([]byte(jsonTestString), &testJson)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// for key, value := range testJson {
-	// 	if values[key] != value {
-	// 		t.Errorf(
-	// 			"Wrong value for key %s. Got \"%s\" wanted \"%s\"",
-	// 			key,
-	// 			values[key],
-	// 			value,
-	// 		)
-	// 	}
-	// }
+
+	outputs, err = GetOutputFromUrl(lex88)
+
+	values := outputs[0].Columns
+	testJson := make(map[string]string)
+	err = json.Unmarshal([]byte(jsonTestString), &testJson)
+	if err != nil {
+		t.Error(err)
+	}
+	for key, value := range testJson {
+		if values[key] != value {
+			t.Errorf(
+				"Wrong value for key %s. Got \"%s\" wanted \"%s\"",
+				key,
+				values[key],
+				value,
+			)
+		}
+	}
 }
