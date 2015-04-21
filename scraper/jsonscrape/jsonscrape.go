@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -92,9 +95,32 @@ func ParseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 	return
 }
 
-func GetOutputFromUrl(url string) (outputs []Output, err error) {
+func randSeq(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 
-	doc, err := goquery.NewDocument(url)
+func GetOutputFromUrl(url string) (outputs []Output, err error) {
+	var resp *http.Response
+
+	for {
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", url, nil)
+		req.Header.Add("User-Agent", randSeq(100))
+		resp, err = client.Do(req)
+		if err != nil {
+			log.Println(err)
+			time.Sleep(time.Second * 20)
+		} else {
+			break
+		}
+	}
+
+	doc, err := goquery.NewDocumentFromResponse(resp)
 	if err != nil {
 		log.Println(err)
 		return
