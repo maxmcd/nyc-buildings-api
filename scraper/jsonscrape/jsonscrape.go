@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -42,10 +43,15 @@ func ReturnUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
 	for _, item := range items {
 		doc.Find(item.Location).Each(func(i int, s *goquery.Selection) {
-			url, exists := s.Attr("href")
+			href, exists := s.Attr("href")
 			if exists == true {
-				url = doc.Url.Scheme + "://" + doc.Url.Host + "/" + url
-				urls = append(urls, url)
+				parseUrl, err := url.Parse(href)
+				if err != nil {
+					log.Println(err)
+				}
+
+				href = doc.Url.ResolveReference(parseUrl).String()
+				urls = append(urls, href)
 			}
 		})
 	}
@@ -87,9 +93,11 @@ func ParseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 }
 
 func GetOutputFromUrl(url string) (outputs []Output, err error) {
+
 	doc, err := goquery.NewDocument(url)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	locations, err := ParseLocations("../locations/locations.json")
 	if err != nil {
@@ -109,6 +117,7 @@ func ReturnTableValuesFromDoc(doc *goquery.Document, items []Items) (
 	values = make(map[string]string)
 
 	for _, item := range items {
+		fmt.Println(item.Location)
 		text := doc.Find(item.Location).Text()
 		text = strings.TrimSpace(text)
 

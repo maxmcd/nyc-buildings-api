@@ -6,7 +6,7 @@
 	"tax_block":"882",
 	"condo":"NO",
 	"vacant":"NO",
-	"cross_streets":"EAST 26 STREET,   EAST 27 STREET",
+	"cross_streets":"EAST   26 STREET,   EAST   27 STREET",
 	"dob_special_place_name":"",
 	"landmark_status":"",
 	"local_law":"YES",
@@ -16,19 +16,10 @@
 	"special_status":"N/A",
 	"city_owned":"NO",
 	"special_district":"UNKNOWN",
-	"complaints":{
-		"total":"33",
-		"open":"0",
-		"path":"/builings/{bll}/complaints"
-	},
-	"violations_dob":{
-		"total":"33",
-		"open":"0",
-		"path":"/builings/{bll}/volations_dob"
-	},
-	"violations_ecb":{
-		"total":"33",
-		"open":"0",
-		"path":"/builings/{bll}/volations_ecb"
-	}
+	"complaints_total":"33",
+	"complaints_open":"0",
+	"violations_dob_total":"50",
+	"violations_dob_open":"2",
+	"violations_ecb_total":"14",
+	"violations_ecb_open":"4"
 }

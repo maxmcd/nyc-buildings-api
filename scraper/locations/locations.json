@@ -190,6 +190,42 @@
 					]
 				}
 			]
+		},
+		{
+			"root": "http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?",
+			"paths":[
+				{
+					"name": "*vlcompdetlkey=*",
+					"directives":[
+						{
+							"type":"scrape",
+							"table":"complaints",
+							"items":[
+								{
+									"name":"bin",
+									"location":"body > center > table:nth-child(2) > tbody > tr:nth-child(1) > td:nth-child(2) > a",
+									"regex":""
+								},
+								{
+									"name":"complaint_number",
+									"location":"body > center > table:nth-child(1) > tbody > tr:nth-child(4) > td",
+									"regex":"(\\d+)"
+								},
+								{
+									"name":"comments",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(5) > td:nth-child(2)",
+									"regex":""
+								},
+								{
+									"name":"ecb_violation_number",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(4) > td:nth-child(2)",
+									"regex":""
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }
