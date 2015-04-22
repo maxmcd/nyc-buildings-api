@@ -59,6 +59,7 @@
 						{
 							"type":"scrape",
 							"table":"buildings",
+							"identifier":"bin",
 							"items": [
 								{
 									"name": "health_area",

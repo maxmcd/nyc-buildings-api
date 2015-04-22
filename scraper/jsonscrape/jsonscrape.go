@@ -40,8 +40,9 @@ type Items struct {
 }
 
 type Output struct {
-	Table   string
-	Columns map[string]string
+	Table      string
+	Identifier string
+	Columns    map[string]string
 }
 
 /*
@@ -53,7 +54,7 @@ absolute url.
 
 A list of urls to scrape is returned.
 */
-func ReturnUrlsFromDoc(doc *goquery.Document, items []Items) (
+func returnUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
 	for _, item := range items {
 		doc.Find(item.Location).Each(func(i int, s *goquery.Selection) {
@@ -101,12 +102,12 @@ function to grab the necessary output. This
 operation will be repeated recursively until all
 outputs are generated and returned.
 */
-func ParseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (outputs []Output) {
+func parseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (outputs []Output) {
 	for _, directive := range directives {
 
 		var urls []string
 		if directive.Type == "links" {
-			urls = ReturnUrlsFromDoc(doc, directive.Items)
+			urls = returnUrlsFromDoc(doc, directive.Items)
 		} else if directive.Type == "form" {
 			urls = ReturnFormUrlsFromDoc(doc, directive.Items)
 		}
@@ -119,7 +120,7 @@ func ParseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 		}
 
 		if directive.Type == "scrape" {
-			values := ReturnTableValuesFromDoc(doc, directive.Items)
+			values := returnTableValuesFromDoc(doc, directive.Items)
 			outputs = append(outputs, Output{
 				Table:   directive.Table,
 				Columns: values,
@@ -160,23 +161,23 @@ func GetOutputFromUrl(url string) (outputs []Output, err error) {
 		return
 	}
 
-	err = ArchivePageToS3(doc)
+	err = archivePageToS3(doc)
 	if err != nil {
 		log.Println(err)
 	}
-	locations, err := ParseLocations("../locations/locations.json")
+	locations, err := parseLocations("../locations/locations.json")
 	if err != nil {
 		log.Println(err)
 	}
-	directives, err := GetDirectives(url, locations)
+	directives, err := getDirectives(url, locations)
 	if err != nil {
 		log.Println(err)
 	}
-	outputs = ParseDirectivesWithDoc(doc, directives)
+	outputs = parseDirectivesWithDoc(doc, directives)
 	return
 }
 
-func ReturnTableValuesFromDoc(doc *goquery.Document, items []Items) (
+func returnTableValuesFromDoc(doc *goquery.Document, items []Items) (
 	values map[string]string) {
 
 	values = make(map[string]string)
@@ -203,7 +204,7 @@ func ReturnTableValuesFromDoc(doc *goquery.Document, items []Items) (
 	return
 }
 
-func ParseLocations(filepath string) (locations Locations, err error) {
+func parseLocations(filepath string) (locations Locations, err error) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return
@@ -212,7 +213,7 @@ func ParseLocations(filepath string) (locations Locations, err error) {
 	return
 }
 
-func GetDirectives(url string, locations Locations) (directives []Directives, err error) {
+func getDirectives(url string, locations Locations) (directives []Directives, err error) {
 	for _, endpoint := range locations.Endpoints {
 		rootMatchString := endpoint.Root + ".*"
 		rootMatchString = prepareStringForRegex(rootMatchString)
@@ -221,7 +222,7 @@ func GetDirectives(url string, locations Locations) (directives []Directives, er
 			log.Fatal(err)
 		}
 		if match == true {
-			directives, err = MatchPath(url, endpoint.Root, endpoint.Paths)
+			directives, err = matchPath(url, endpoint.Root, endpoint.Paths)
 			if err == nil {
 				return directives, err
 			}
@@ -231,7 +232,7 @@ func GetDirectives(url string, locations Locations) (directives []Directives, er
 	return
 }
 
-func MatchPath(url, root string, paths []Paths) (directives []Directives, err error) {
+func matchPath(url, root string, paths []Paths) (directives []Directives, err error) {
 	for _, path := range paths {
 		splitPaths := strings.Split(path.Name, "|")
 		for _, splitPath := range splitPaths {
@@ -260,7 +261,7 @@ func prepareStringForRegex(input string) string {
 	return input
 }
 
-func ArchivePageToS3(doc *goquery.Document) error {
+func archivePageToS3(doc *goquery.Document) error {
 
 	auth, err := aws.EnvAuth()
 	if err != nil {

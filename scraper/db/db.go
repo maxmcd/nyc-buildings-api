@@ -91,7 +91,7 @@ func WriteColumnsMapToTable(columns map[string]string, table string, identifier 
 	params := querySruct.createQueryString(exists)
 	fmt.Println(params)
 	fmt.Println(querySruct.ouput)
-	foo, err := db.Exec(
+	foo, err := db.Query(
 		querySruct.ouput,
 		params...,
 	)
