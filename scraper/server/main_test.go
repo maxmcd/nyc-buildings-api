@@ -5,7 +5,13 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/gethaven/nyc-buildings-api/scraper/db"
 )
+
+func init() {
+	db.Connect()
+}
 
 func TestLinkHandler(t *testing.T) {
 	lex88 := "http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?boro=1&block=882&lot=21&go3=+GO+&requestid=0"

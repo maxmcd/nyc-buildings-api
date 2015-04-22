@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	db.Connect()
 	http.HandleFunc("/", LinkHandler)
 	port := "8080"
 	log.Println("Server running on port:", port)

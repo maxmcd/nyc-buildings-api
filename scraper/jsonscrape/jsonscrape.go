@@ -29,9 +29,10 @@ type Paths struct {
 	Directives []Directives `json:"directives"`
 }
 type Directives struct {
-	Items []Items `json:"items"`
-	Table string  `json:"table"`
-	Type  string  `json:"type"`
+	Items      []Items `json:"items"`
+	Table      string  `json:"table"`
+	Identifier string  `json:"identifier"`
+	Type       string  `json:"type"`
 }
 type Items struct {
 	Location string `json:"location"`
@@ -122,8 +123,9 @@ func parseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 		if directive.Type == "scrape" {
 			values := returnTableValuesFromDoc(doc, directive.Items)
 			outputs = append(outputs, Output{
-				Table:   directive.Table,
-				Columns: values,
+				Table:      directive.Table,
+				Columns:    values,
+				Identifier: directive.Identifier,
 			})
 		}
 

@@ -7,7 +7,7 @@ var table string
 
 func init() {
 	columns = map[string]string{
-		"bin":                        "5",
+		"bin":                        "6",
 		"vacant":                     "NO",
 		"landmark_status":            "",
 		"special_district":           "UNKNOWN",
@@ -36,7 +36,7 @@ func init() {
 	table = "buildings"
 }
 func TestConnect(t *testing.T) {
-	connect()
+	Connect()
 }
 
 func TestWriteColumnsMapToTable(t *testing.T) {

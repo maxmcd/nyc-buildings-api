@@ -62,6 +62,11 @@
 							"identifier":"bin",
 							"items": [
 								{
+									"name": "bin",
+									"location":"body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td:nth-child(3)",
+									"regex":"(\\d+)"
+								},
+								{
 									"name": "health_area",
 									"location": "body > center > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(6)",
 									"regex": "(\\d+)"

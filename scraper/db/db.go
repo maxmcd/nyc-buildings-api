@@ -11,7 +11,7 @@ import (
 
 var db *sql.DB
 
-func connect() {
+func Connect() {
 	var err error
 	db, err = sql.Open("postgres", "dbname=nyc-buildings-api sslmode=disable")
 	if err != nil {
@@ -114,9 +114,19 @@ func checkExistence(columns map[string]string, table string, identifier string) 
 		table + "\" WHERE \"" +
 		table + "\".\"" +
 		identifier + "\" = $1 LIMIT 1"
-	rows, err := db.Query(query, columns[identifier])
+	fmt.Println(query)
+	fmt.Println(columns[identifier])
+	exec, err := db.Exec(query, columns[identifier])
 	if err != nil {
 		return false, err
 	}
-	return rows.Next(), nil
+	count, err := exec.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if count == 0 {
+		return false, nil
+	}
+	return true, nil
 }
