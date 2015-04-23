@@ -48,67 +48,32 @@ var Building  = sequelize.define('buildings', {
 // -----------------------------
 
 server.get('/building/:bin', function(req, res) {
-    var bin = req.params.bin;
+    var bin    = req.params.bin;
+    var output = findBIN(bin);
 
-    Building
-    	.findOne({where:{bin:bin}})
-    	.complete(function (err, data) {
- 				if (data != null) {
- 					var data = data.dataValues;
- 					var output = {
-						bbl                        : data.bbl,
-						bin                        : data.bin,
-						health_area                : data.health_area,
-						census_tract               : data.census_tract,
-						community_board            : data.community_board,
-						buildings_on_lot           : data.buildings_on_lot,
-						tax_block                  : data.tax_block,
-						condo                      : data.condo,
-						vacant                     : data.vacant,
-						cross_streets              : data.cross_streets,
-						dob_special_place_name     : data.dob_special_place_name,
-						landmark_status            : data.landmark_status,
-						local_law                  : data.local_law,
-						environmental_restrictions : data.environmental_restrictions,
-						legal_adult_use            : data.legal_adult_use,
-						loft_law                   : data.loft_law,
-						special_status             : data.special_status,
-						city_owned                 : data.city_owned,
-						special_district           : data.special_district,
-						complaints                 : {
-							total                    : data.complaints_total,
-							open                     : data.complaints_open,
-						},
-						violations                 : {
-							dob_total                : data.violations_dob_total,
-							dob_open                 : data.violations_dob_open,
-							ecb_total                : data.violations_ecb_total,
-							ecb_open                 : data.violations_ecb_open,
-						},
- 					}
- 					res.send(output);
- 				}
- 				else {
- 					// create a url to pass
- 					var host = 'http://localhost:8001';
- 					var path = '/?link=' + 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
-					
-					var options = {
-					  host:   host,
-					  path:   path,
-					  method: 'GET',
-					};
+    if (output) {
+    	res.send(output)
+    }
+		else {
+			// create a url to pass
+			var host = 'http://localhost:8001';
+			var path = '/?link=' + 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
 
-					var req = http.request(options, function(res) {
-						if (res.statusCode == '200') {
-							console.log('yay');
-						}
-						else {
-							console.log('fuck')
-						}
-					});
- 				}
- 			});
+			var options = {
+			  host:   host,
+			  path:   path,
+			  method: 'GET',
+			};
+
+			var req = http.request(options, function(res) {
+				if (res.statusCode == '200') {
+					console.log('yay');
+				}
+				else {
+					console.log('fuck')
+				}
+			});
+		}
   }
 );
 
@@ -182,6 +147,50 @@ function jsonFormatter(req, res, body) {
   }
  
   return data;
+}
+
+function findBIN(bin) {
+	Building
+	.findOne({where:{bin:bin}})
+	.complete(function (err, data) {
+			if (data != null) {
+				var data = data.dataValues;
+				var output = {
+				bbl                        : data.bbl,
+				bin                        : data.bin,
+				health_area                : data.health_area,
+				census_tract               : data.census_tract,
+				community_board            : data.community_board,
+				buildings_on_lot           : data.buildings_on_lot,
+				tax_block                  : data.tax_block,
+				condo                      : data.condo,
+				vacant                     : data.vacant,
+				cross_streets              : data.cross_streets,
+				dob_special_place_name     : data.dob_special_place_name,
+				landmark_status            : data.landmark_status,
+				local_law                  : data.local_law,
+				environmental_restrictions : data.environmental_restrictions,
+				legal_adult_use            : data.legal_adult_use,
+				loft_law                   : data.loft_law,
+				special_status             : data.special_status,
+				city_owned                 : data.city_owned,
+				special_district           : data.special_district,
+				complaints                 : {
+					total                    : data.complaints_total,
+					open                     : data.complaints_open,
+				},
+				violations                 : {
+					dob_total                : data.violations_dob_total,
+					dob_open                 : data.violations_dob_open,
+					ecb_total                : data.violations_ecb_total,
+					ecb_open                 : data.violations_ecb_open,
+				},
+				}
+				return output;
+			}
+			else {
+				return false
+			}
 }
 
 
