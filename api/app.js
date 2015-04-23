@@ -66,8 +66,8 @@ server.get('/building/:bin', function(req, res) {
 						condo                      : data.condo,
 						vacant                     : data.vacant,
 						cross_streets              : data.cross_streets,
-						dob_special_place_name     : data.dob_special_place_name
-						landmark_status            : data.landmark_status
+						dob_special_place_name     : data.dob_special_place_name,
+						landmark_status            : data.landmark_status,
 						local_law                  : data.local_law,
 						environmental_restrictions : data.environmental_restrictions,
 						legal_adult_use            : data.legal_adult_use,
@@ -89,7 +89,24 @@ server.get('/building/:bin', function(req, res) {
  					res.send(output);
  				}
  				else {
- 					res.send("FUCK THE WORLD")
+ 					// create a url to pass
+ 					var host = 'http://localhost:8001';
+ 					var path = '/?link=' + 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
+					
+					var options = {
+					  host:   host,
+					  path:   path,
+					  method: 'GET',
+					};
+
+					var req = http.request(options, function(res) {
+						if (res.statusCode == '200') {
+							console.log('yay');
+						}
+						else {
+							console.log('fuck')
+						}
+					});
  				}
  			});
   }
