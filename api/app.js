@@ -5,6 +5,7 @@ var server    = restify.createServer({
 		'application/json': jsonFormatter
 	},
 });
+var request = require('urllib-sync').request;
 
 var fs        = require("fs");
 var path      = require("path");
@@ -40,7 +41,6 @@ var Building  = sequelize.define('buildings', {
   "violations_ecb_total"       : Sequelize.STRING,
   "violations_ecb_open"        : Sequelize.STRING,
 });
-  
 
 
 // -----------------------------
@@ -50,29 +50,19 @@ var Building  = sequelize.define('buildings', {
 server.get('/building/:bin', function(req, res) {
     var bin    = req.params.bin;
     var output = findBIN(bin);
-
     if (output) {
-    	res.send(output)
+    	res.send(output);
     }
 		else {
 			// create a url to pass
-			var host = 'http://localhost:8001';
-			var path = '/?link=' + 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
-
-			var options = {
-			  host:   host,
-			  path:   path,
-			  method: 'GET',
-			};
-
-			var req = http.request(options, function(res) {
-				if (res.statusCode == '200') {
-					console.log('yay');
-				}
-				else {
-					console.log('fuck')
-				}
-			});
+			var url = 'http://localhost:8001/?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
+			code = passUrlToScraper(url)
+			if (code != 200) {
+				res.send("whoops")
+			} else {
+				var output = findBIN(bin)				
+				res.send(output)
+			}
 		}
   }
 );
@@ -153,9 +143,10 @@ function findBIN(bin) {
 	Building
 	.findOne({where:{bin:bin}})
 	.complete(function (err, data) {
-			if (data != null) {
-				var data = data.dataValues;
-				var output = {
+		var output = false;
+		if (data != null) {
+			var data = data.dataValues;
+			output = {
 				bbl                        : data.bbl,
 				bin                        : data.bin,
 				health_area                : data.health_area,
@@ -185,12 +176,19 @@ function findBIN(bin) {
 					ecb_total                : data.violations_ecb_total,
 					ecb_open                 : data.violations_ecb_open,
 				},
-				}
-				return output;
 			}
-			else {
-				return false
-			}
+		}
+		return output;
+	});
+}
+
+function passUrlToScraper(url) {
+	try {
+		var res = request(url);
+		return res.status		
+	} catch (e) {
+		return 500
+	}
 }
 
 
