@@ -4,7 +4,6 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "httpsync": "0.0.8",
     "pg": "^4.3.0",
     "pg-hstore": "^2.3.2",
     "restify": "^3.0.2",

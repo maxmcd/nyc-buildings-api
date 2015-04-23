@@ -5,7 +5,6 @@ var server    = restify.createServer({
 		'application/json': jsonFormatter
 	},
 });
-var request = require('urllib-sync').request;
 
 var fs        = require("fs");
 var path      = require("path");
@@ -49,21 +48,22 @@ var Building  = sequelize.define('buildings', {
 
 server.get('/building/:bin', function(req, res) {
     var bin    = req.params.bin;
-    var output = findBIN(bin);
-    if (output) {
-    	res.send(output);
-    }
-		else {
-			// create a url to pass
-			var url = 'http://localhost:8001/?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-			code = passUrlToScraper(url)
-			if (code != 200) {
-				res.send("whoops")
-			} else {
-				var output = findBIN(bin)				
-				res.send(output)
+    var output = findBIN(bin, function(output) {
+	    if (output) {
+	    	res.send(output);
+	    }
+			else {
+				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
+				code = passUrlToScraper("localhost:8001", url)
+				if (code != 200) {
+					res.status(code).send()
+				} else {
+					var output = findBIN(bin, function(output) {
+						res.send(output)
+					})
+				}
 			}
-		}
+    });
   }
 );
 
@@ -139,7 +139,7 @@ function jsonFormatter(req, res, body) {
   return data;
 }
 
-function findBIN(bin) {
+function findBIN(bin, callback) {
 	Building
 	.findOne({where:{bin:bin}})
 	.complete(function (err, data) {
@@ -178,7 +178,7 @@ function findBIN(bin) {
 				},
 			}
 		}
-		return output;
+		return callback(output);
 	});
 }
 
