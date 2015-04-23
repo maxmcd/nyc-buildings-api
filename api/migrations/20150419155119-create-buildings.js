@@ -17,6 +17,7 @@ module.exports = {
       community_board            : Sequelize.STRING,
       buildings_on_lot           : Sequelize.STRING,
       tax_block                  : Sequelize.STRING,
+      tax_lot                    : Sequelize.STRING,
       condo                      : Sequelize.STRING,
       vacant                     : Sequelize.STRING,
       cross_streets              : Sequelize.STRING,
