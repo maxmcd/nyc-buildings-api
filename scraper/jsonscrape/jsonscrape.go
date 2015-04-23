@@ -17,7 +17,14 @@ import (
 	"github.com/mitchellh/goamz/s3"
 )
 
-var globalLocations Locations
+var (
+	globalLocations Locations
+	globalClient    *http.Client
+)
+
+func init() {
+	globalClient = &http.Client{}
+}
 
 type Locations struct {
 	Endpoints []Endpoints `json:"endpoints"`
@@ -149,18 +156,17 @@ func GetOutputFromUrl(url string, locations Locations) (outputs []Output, err er
 	var resp *http.Response
 
 	for {
-		client := &http.Client{}
 		req, err := http.NewRequest("GET", url, nil)
 		req.Header.Add("User-Agent", randSeq(100))
-		resp, err = client.Do(req)
-		if resp.StatusCode != http.StatusOK {
-			err = fmt.Errorf("Wrong http status code for url: %s", url)
-			return outputs, err
-		}
+		resp, err = globalClient.Do(req)
 		if err != nil {
 			log.Println(err)
 			time.Sleep(time.Second * 20)
 		} else {
+			if resp.StatusCode != http.StatusOK {
+				err = fmt.Errorf("Wrong http status code for url: %s", url)
+				return outputs, err
+			}
 			break
 		}
 	}

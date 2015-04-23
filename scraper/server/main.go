@@ -12,13 +12,18 @@ import (
 
 var locations jsonscrape.Locations
 
-func main() {
+func init() {
+
 	var err error
 	locations, err = jsonscrape.ParseLocations("https://raw.githubusercontent.com/gethaven/nyc-buildings-api/master/scraper/locations/locations.json")
 	if err != nil {
 		log.Println("error parsing locations file:")
 		log.Fatal(err)
 	}
+
+}
+
+func main() {
 	db.Connect()
 	http.HandleFunc("/", LinkHandler)
 	port := "8001"

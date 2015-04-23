@@ -73,7 +73,7 @@ func TestGetOutputFromUrl(t *testing.T) {
 	// outputs, err := GetOutputFromUrl(lex88compl)
 	// fmt.Println(outputs, err)
 
-	outputs, err := GetOutputFromUrl(lex88)
+	outputs, err := GetOutputFromUrl(lex88, locations)
 	fmt.Printf("%#v/n", outputs)
 	values := outputs[0].Columns
 	testJson := make(map[string]string)
