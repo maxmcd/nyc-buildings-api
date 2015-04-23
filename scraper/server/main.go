@@ -10,7 +10,15 @@ import (
 	"github.com/gethaven/nyc-buildings-api/scraper/jsonscrape"
 )
 
+var locations jsonscrape.Locations
+
 func main() {
+	var err error
+	locations, err = jsonscrape.ParseLocations("https://raw.githubusercontent.com/gethaven/nyc-buildings-api/master/scraper/locations/locations.json")
+	if err != nil {
+		log.Println("error parsing locations file:")
+		log.Fatal(err)
+	}
 	db.Connect()
 	http.HandleFunc("/", LinkHandler)
 	port := "8001"
@@ -22,7 +30,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 	link := req.URL.Query().Get("link")
 
 	fmt.Println(link)
-	outputs, err := jsonscrape.GetOutputFromUrl(link)
+	outputs, err := jsonscrape.GetOutputFromUrl(link, locations)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)

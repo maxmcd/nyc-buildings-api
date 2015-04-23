@@ -17,6 +17,8 @@ import (
 	"github.com/mitchellh/goamz/s3"
 )
 
+var globalLocations Locations
+
 type Locations struct {
 	Endpoints []Endpoints `json:"endpoints"`
 }
@@ -113,7 +115,7 @@ func parseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 			urls = ReturnFormUrlsFromDoc(doc, directive.Items)
 		}
 		for _, url := range urls {
-			linkOutput, err := GetOutputFromUrl(url)
+			linkOutput, err := GetOutputFromUrl(url, globalLocations)
 			if err != nil {
 				log.Println(err)
 			}
@@ -142,7 +144,8 @@ func randSeq(n int) string {
 	return string(b)
 }
 
-func GetOutputFromUrl(url string) (outputs []Output, err error) {
+func GetOutputFromUrl(url string, locations Locations) (outputs []Output, err error) {
+	globalLocations = locations
 	var resp *http.Response
 
 	for {
@@ -150,6 +153,10 @@ func GetOutputFromUrl(url string) (outputs []Output, err error) {
 		req, err := http.NewRequest("GET", url, nil)
 		req.Header.Add("User-Agent", randSeq(100))
 		resp, err = client.Do(req)
+		if resp.StatusCode != http.StatusOK {
+			err = fmt.Errorf("Wrong http status code for url: %s", url)
+			return outputs, err
+		}
 		if err != nil {
 			log.Println(err)
 			time.Sleep(time.Second * 20)
@@ -164,10 +171,6 @@ func GetOutputFromUrl(url string) (outputs []Output, err error) {
 	}
 
 	err = archivePageToS3(doc)
-	if err != nil {
-		log.Println(err)
-	}
-	locations, err := parseLocations("../locations/locations.json")
 	if err != nil {
 		log.Println(err)
 	}
@@ -206,12 +209,18 @@ func returnTableValuesFromDoc(doc *goquery.Document, items []Items) (
 	return
 }
 
-func parseLocations(filepath string) (locations Locations, err error) {
-	bytes, err := ioutil.ReadFile(filepath)
+func ParseLocations(url string) (locations Locations, err error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
-	json.Unmarshal(bytes, &locations)
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	json.Unmarshal(body, &locations)
 	return
 }
 
