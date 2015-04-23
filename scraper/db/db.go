@@ -89,8 +89,7 @@ func WriteColumnsMapToTable(columns map[string]string, table string, identifier 
 	}
 
 	params := querySruct.createQueryString(exists)
-	fmt.Println(params)
-	fmt.Println(querySruct.ouput)
+
 	foo, err := db.Query(
 		querySruct.ouput,
 		params...,
@@ -103,7 +102,8 @@ func WriteColumnsMapToTable(columns map[string]string, table string, identifier 
 	// // var userid int
 	// // err := db.QueryRow(`INSERT INTO buildings(name, favorite_fruit, age)
 	// // 	VALUES('beatrice', 'starfruit', 93) RETURNING id`).Scan(&userid)
-	fmt.Println(foo)
+	// fmt.Println(foo)
+	_ = foo
 	// var err error
 	return err
 }
@@ -114,8 +114,6 @@ func checkExistence(columns map[string]string, table string, identifier string) 
 		table + "\" WHERE \"" +
 		table + "\".\"" +
 		identifier + "\" = $1 LIMIT 1"
-	fmt.Println(query)
-	fmt.Println(columns[identifier])
 	exec, err := db.Exec(query, columns[identifier])
 	if err != nil {
 		return false, err

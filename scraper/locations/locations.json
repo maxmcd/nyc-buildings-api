@@ -117,11 +117,6 @@
 									"regex": ""
 								},
 								{
-									"name": "dob_building_remarks",
-									"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(5) > td:nth-child(2)",
-									"regex": ""
-								},
-								{
 									"name": "landmark_status",
 									"location": "body > center > table:nth-child(5) > tbody > tr:nth-child(6) > td:nth-child(2)",
 									"regex": ""

@@ -13,7 +13,7 @@ import (
 func main() {
 	db.Connect()
 	http.HandleFunc("/", LinkHandler)
-	port := "8080"
+	port := "8001"
 	log.Println("Server running on port:", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -43,6 +43,11 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	output := strings.Join(errors, ", ")
-	w.Write([]byte(output))
+	if len(output) > 0 {
+		w.Write([]byte(output))
+	} else {
+		w.Write([]byte("ok"))
+	}
+
 	return
 }
