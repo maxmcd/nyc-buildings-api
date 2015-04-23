@@ -6,6 +6,7 @@ census_tract
 community_board
 buildings_on_lot
 tax_block
+tax_lot
 condo
 vacant
 cross_streets
