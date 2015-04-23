@@ -1,8 +1,16 @@
-# nyc-dob-api
-Simple api and notification service built on top of NYC's DOB building information search.
+# NYC Buildings API
+A Simple API and notification service built on top of NYC's DOB building information search.
 
+## Documentation
+[NYC Buildings API Documentation](http://gethaven.github.io/nyc-buildings-api-docs)
 
-## API
+## Development
+
+This application consists of two components. A public-facing Node api built on restify, and a scraping server written in Go.
+
+### Overview
+
+### API
 
 **Dev Setup**
 ``` bash
