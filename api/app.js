@@ -46,20 +46,22 @@ var Building  = sequelize.define('buildings', {
 // Endpoints
 // -----------------------------
 
-server.get('/building/:bin', function(req, res) {
+server.get('/buildings/:bin', function(req, res) {
     var bin    = req.params.bin;
-    var output = findBIN(bin, function(output) {
+    var output = getBuildingOutput(bin, function(output) {
 	    if (output) {
 	    	res.send(output);
 	    }
 			else {
 				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-				code = passUrlToScraper("localhost:8001", url)
+				code = passUrlToScraper("http://localhost:8001", url)
 				if (code != 200) {
-					res.status(code).send()
+						res.status(code);
+						res.send();
 				} else {
-					var output = findBIN(bin, function(output) {
-						res.send(output)
+					var output = getBuildingOutput(bin, function(output) {
+						res.status(200);
+						res.send(output);
 					})
 				}
 			}
@@ -67,41 +69,6 @@ server.get('/building/:bin', function(req, res) {
   }
 );
 
-server.get('/another', function(req, res) {
-	Building.create({
-		"bbl": "1008820021",
-		"bin": "1018131",
-	  "health_area": "5300",
-	  "census_tract":"68",
-	  "community_board":"105",
-	  "buildings_on_lot":"1",
-	  "tax_block":"882",
-	  "condo":"NO",
-	  "vacant":"NO",
-	  "cross_streets":"EAST   26 STREET,   EAST   27 STREET",
-	  "dob_special_place_name":"",
-	  "landmark_status":"",
-	  "local_law":"YES",
-	  "environmental_restrictions":"N/A",
-	  "legal_adult_use":"NO",
-	  "loft_law":"NO",
-	  "special_status":"N/A",
-	  "city_owned":"NO",
-	  "special_district":"UNKNOWN",
-	  "complaints_total":"33",
-	  "complaints_open":"0",
-	  "violations_dob_total":"50",
-	  "violations_dob_open":"2",
-	  "violations_ecb_total":"14",
-	  "violations_ecb_open":"4"
-	}).then(function(building) {
-	  console.log(building.get({
-	    plain: true
-	  }))
-	}).then(function() {
-		res.send('foo - it was added');
-	});	
-})
 
 // -----------------------------
 // Utilities
@@ -139,7 +106,7 @@ function jsonFormatter(req, res, body) {
   return data;
 }
 
-function findBIN(bin, callback) {
+function getBuildingOutput(bin, callback) {
 	Building
 	.findOne({where:{bin:bin}})
 	.complete(function (err, data) {
