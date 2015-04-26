@@ -10,9 +10,14 @@ var fs        = require("fs");
 var path      = require("path");
 var Sequelize = require("sequelize");
 var env       = process.env.NODE_ENV || "development";
-var config    = require(__dirname + '/config/config.json')[env];
-var sequelize = new Sequelize(config.database, config.username, config.password, config);
-
+var config, sequelize;
+if (env == "production") {
+	console.log(process.env.NYCBDB)
+	sequelize = new Sequelize("postgres://" + process.env.NYCBDB);
+} else {
+	config    = require(__dirname + '/config/config.json')[env];
+	sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
 // -----------------------------
 // Model definitions
@@ -131,7 +136,7 @@ server.get('/buildings/:bin', function(req, res) {
 	    }
 			else {
 				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url)
+				code = passUrlToScraper("http://localhost:8001", url);
 				if (code != 200) {
 						res.status(code);
 						res.send();
@@ -154,8 +159,8 @@ server.get('/buildings/:bin/complaints', function(req, res) {
 	    	res.send(output);
 	    }
 			else {
-				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url)
+				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin);
+				code = passUrlToScraper("http://localhost:8001", url);
 				if (code != 200) {
 						res.status(code);
 						res.send();
@@ -171,14 +176,14 @@ server.get('/buildings/:bin/complaints', function(req, res) {
 );
 
 server.get('/complaint/:complaint_num', function(req, res) {
-    var complaint_num    = req.params.complaint_num;
-    var output = getComplaint(complaint_num, function(output) {
+    var complaint_num = req.params.complaint_num;
+    var output        = getComplaint(complaint_num, function(output) {
 	    if (output) {
 	    	res.send(output);
 	    }
 			else {
-				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url)
+				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + bin);
+				code = passUrlToScraper("http://localhost:8001", url);
 				if (code != 200) {
 						res.status(code);
 						res.send();
@@ -306,36 +311,35 @@ function getBuilding_profile(bin, callback) {
 	.complete(function (err, data) {
 		var output = false;
 		if (data != null) {
-			var data = data.dataValues;
+			var element = data.dataValues;
 			output = {
-				bbl                        : data.bbl,
-				bin                        : data.bin,
-				health_area                : data.health_area,
-				census_tract               : data.census_tract,
-				community_board            : data.community_board,
-				buildings_on_lot           : data.buildings_on_lot,
-				tax_block                  : data.tax_block,
-				condo                      : data.condo,
-				vacant                     : data.vacant,
-				cross_streets              : data.cross_streets,
-				dob_special_place_name     : data.dob_special_place_name,
-				landmark_status            : data.landmark_status,
-				local_law                  : data.local_law,
-				environmental_restrictions : data.environmental_restrictions,
-				legal_adult_use            : data.legal_adult_use,
-				loft_law                   : data.loft_law,
-				special_status             : data.special_status,
-				city_owned                 : data.city_owned,
-				special_district           : data.special_district,
+				bin                        : element.bin,
+				health_area                : element.health_area,
+				census_tract               : element.census_tract,
+				community_board            : element.community_board,
+				buildings_on_lot           : element.buildings_on_lot,
+				tax_block                  : element.tax_block,
+				condo                      : element.condo,
+				vacant                     : element.vacant,
+				cross_streets              : element.cross_streets,
+				dob_special_place_name     : element.dob_special_place_name,
+				landmark_status            : element.landmark_status,
+				local_law                  : element.local_law,
+				environmental_restrictions : element.environmental_restrictions,
+				legal_adult_use            : element.legal_adult_use,
+				loft_law                   : element.loft_law,
+				special_status             : element.special_status,
+				city_owned                 : element.city_owned,
+				special_district           : element.special_district,
 				complaints                 : {
-					total                    : data.complaints_total,
-					open                     : data.complaints_open,
+					total                    : element.complaints_total,
+					open                     : element.complaints_open,
 				},
 				violations                 : {
-					dob_total                : data.violations_dob_total,
-					dob_open                 : data.violations_dob_open,
-					ecb_total                : data.violations_ecb_total,
-					ecb_open                 : data.violations_ecb_open,
+					dob_total                : element.violations_dob_total,
+					dob_open                 : element.violations_dob_open,
+					ecb_total                : element.violations_ecb_total,
+					ecb_open                 : element.violations_ecb_open,
 				},
 			}
 		}
@@ -347,42 +351,32 @@ function getBuilding_complaints(bin, callback) {
 	Complaint
 	.findAll({where:{bin:bin}})
 	.complete(function (err, data) {
-		var output = false;
+		var output_list = [];
 		if (data != null) {
-			var data = data.dataValues;
-			output = {
-				bbl                        : data.bbl,
-				bin                        : data.bin,
-				health_area                : data.health_area,
-				census_tract               : data.census_tract,
-				community_board            : data.community_board,
-				buildings_on_lot           : data.buildings_on_lot,
-				tax_block                  : data.tax_block,
-				condo                      : data.condo,
-				vacant                     : data.vacant,
-				cross_streets              : data.cross_streets,
-				dob_special_place_name     : data.dob_special_place_name,
-				landmark_status            : data.landmark_status,
-				local_law                  : data.local_law,
-				environmental_restrictions : data.environmental_restrictions,
-				legal_adult_use            : data.legal_adult_use,
-				loft_law                   : data.loft_law,
-				special_status             : data.special_status,
-				city_owned                 : data.city_owned,
-				special_district           : data.special_district,
-				complaints                 : {
-					total                    : data.complaints_total,
-					open                     : data.complaints_open,
-				},
-				violations                 : {
-					dob_total                : data.violations_dob_total,
-					dob_open                 : data.violations_dob_open,
-					ecb_total                : data.violations_ecb_total,
-					ecb_open                 : data.violations_ecb_open,
-				},
+			for (var i = 0; i < data.length; i ++) {
+				var element = data[i].dataValues;
+				output = {
+					bin               : element.bin,
+					complaint_num     : element.complaint_num,
+					regarding         : element.regarding,
+					category          : element.category,
+					assigned_to       : element.assigned_to,
+					priority          : element.priority,
+					received          : element.received,
+					block             : element.block,
+					lot               : element.lot,
+					community_board   : element.community_board,
+					owner             : element.owner,
+					last_inspection   : element.last_inspection,
+					disposition       : element.disposition,
+					dob_violation_num : element.dob_violation_num,
+					ecb_violation_num : element.ecb_violation_num,
+					comments          : element.comments,
+				}
+				output_list.push(output);
 			}
 		}
-		return callback(output);
+		return callback(output_list);
 	});
 }
 
