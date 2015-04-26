@@ -18,7 +18,6 @@ module.exports = {
       severity                        : Sequelize.STRING,
       certification_status            : Sequelize.STRING,
       hearing_status                  : Sequelize.STRING,
-      penalty_balance_due             : Sequelize.STRING,
       respondent_name                 : Sequelize.STRING,
       respondent_mailing_address      : Sequelize.STRING,
       violation_date                  : Sequelize.STRING,

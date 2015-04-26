@@ -10,6 +10,7 @@ module.exports = {
                                    },
       updatedAt                  : Sequelize.DATE,
       createdAt                  : Sequelize.DATE,
+      
       bbl                        : Sequelize.STRING,
       bin                        : Sequelize.STRING,
       health_area                : Sequelize.STRING,

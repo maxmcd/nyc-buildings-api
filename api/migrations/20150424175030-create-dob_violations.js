@@ -16,7 +16,6 @@ module.exports = {
       violation_category    : Sequelize.STRING,
       issue_date            : Sequelize.STRING,
       violation_type        : Sequelize.STRING,
-      violation_number      : Sequelize.STRING,
       device_number         : Sequelize.STRING,
       ecb_number            : Sequelize.STRING,
       infraction_codes      : Sequelize.STRING,
