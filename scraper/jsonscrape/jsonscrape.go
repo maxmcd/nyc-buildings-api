@@ -66,6 +66,7 @@ A list of urls to scrape is returned.
 */
 func returnUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
+
 	for _, item := range items {
 		doc.Find(item.Location).Each(func(i int, s *goquery.Selection) {
 			href, exists := s.Attr("href")
@@ -92,6 +93,27 @@ url string to follow.
 func ReturnFormUrlsFromDoc(doc *goquery.Document, items []Items) (
 	urls []string) {
 
+	for _, item := range items {
+		queryString := url.Values{}
+		action, formPresent := doc.Find(item.Location).Attr("action")
+		if formPresent != true {
+			continue
+		}
+		doc.Find(item.Location + " input").Each(func(i int, s *goquery.Selection) {
+			val, exists := s.Attr("type")
+			fmt.Println("hi")
+			if exists == true && val != "image" {
+				name, _ := s.Attr("name")
+				value, _ := s.Attr("value")
+				queryString.Add(name, value)
+			}
+		})
+		relativeUrl := action + "?" + queryString.Encode()
+		relativeUrlUrl, _ := url.Parse(relativeUrl)
+		formUrl := doc.Url.ResolveReference(relativeUrlUrl)
+		urls = append(urls, formUrl.String())
+	}
+	fmt.Println(urls)
 	return
 }
 
@@ -114,7 +136,6 @@ outputs are generated and returned.
 */
 func parseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (outputs []Output) {
 	for _, directive := range directives {
-
 		var urls []string
 		if directive.Type == "links" {
 			urls = returnUrlsFromDoc(doc, directive.Items)
@@ -227,6 +248,14 @@ func ParseLocations(url string) (locations Locations, err error) {
 	}
 
 	json.Unmarshal(body, &locations)
+	return
+}
+func ParseLocalLocations(path string) (locations Locations, err error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return
+	}
+	json.Unmarshal(bytes, &locations)
 	return
 }
 
