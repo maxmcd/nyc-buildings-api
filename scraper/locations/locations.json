@@ -18,7 +18,7 @@
 							"type":"form",
 							"items":[
 								{
-									"location":"form[name='frmnext']"
+									"location":"body > center > table:nth-child(7) > tbody > tr > td:nth-child(3) > form"
 								}
 							]
 						}
@@ -206,23 +206,83 @@
 									"name":"bin",
 									"location":"body > center > table:nth-child(2) > tbody > tr:nth-child(1) > td:nth-child(2) > a",
 									"regex":""
-								},
-								{
-									"name":"complaint_number",
+								},{
+									"name":"complaint_num",
 									"location":"body > center > table:nth-child(1) > tbody > tr:nth-child(4) > td",
 									"regex":"(\\d+)"
-								},
-								{
+								},{
+									"name":"regarding",
+									"location":"body > center > table:nth-child(2) > tbody > tr:nth-child(2) > td",
+									"regex":""
+								},{
+									"name":"category",
+									"location":"body > center > table:nth-child(4) > tbody > tr:nth-child(2) > td:nth-child(2), body > center > table:nth-child(4) > tbody > tr:nth-child(3) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"assigned_to",
+									"location":"body > center > table:nth-child(4) > tbody > tr:nth-child(6) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"priority",
+									"location":"body > center > table:nth-child(4) > tbody > tr:nth-child(6) > td:nth-child(3)",
+									"regex":"Priority:(.*)"
+								},{
+									"name":"received",
+									"location":"body > center > table:nth-child(7) > tbody > tr:nth-child(1) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"block",
+									"location":"body > center > table:nth-child(7) > tbody > tr:nth-child(1) > td:nth-child(4)",
+									"regex":"Block:(.*)"
+								},{
+									"name":"lot",
+									"location":"body > center > table:nth-child(7) > tbody > tr:nth-child(1) > td:nth-child(5)",
+									"regex":"Lot:(.*)"
+								},{
+									"name":"community_board",
+									"location":"body > center > table:nth-child(7) > tbody > tr:nth-child(1) > td:nth-child(7)",
+									"regex":"Community Board:(.*)"
+								},{
+									"name":"owner",
+									"location":"body > center > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"last_inspection",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(1) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"disposition",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(2) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"dob_violation_num",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(3) > td:nth-child(2)",
+									"regex":""
+								},{
+									"name":"ecb_violation_num",
+									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(4) > td:nth-child(2)",
+									"regex":""
+								},{
 									"name":"comments",
 									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(5) > td:nth-child(2)",
 									"regex":""
-								},
-								{
-									"name":"ecb_violation_number",
-									"location":"body > center > table:nth-child(9) > tbody > tr:nth-child(4) > td:nth-child(2)",
-									"regex":""
 								}
 							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"root": "path_for_dob_violations",
+			"paths":[
+				{
+					"name":"*asdfsad*",
+					"directives":[
+						{
+							"type":"scrape",
+							"table":"dob_violations",
+							"items":[]
 						}
 					]
 				}
