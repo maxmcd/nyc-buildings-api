@@ -84,7 +84,6 @@ func (q *query) createQueryString(exists bool) (params []interface{}) {
 		q.ouput += strings.Join(markers, ", ")
 		q.ouput += ")"
 	}
-	fmt.Println(q.ouput)
 	return
 }
 

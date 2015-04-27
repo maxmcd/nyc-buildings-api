@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -45,7 +44,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("include a link"))
 		return
 	}
-	fmt.Println(link)
+
 	outputs, err := jsonscrape.GetOutputFromUrl(link, locations)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -79,7 +78,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(output))
 		log.Println("errors: ", output)
 	} else {
-		w.Write([]byte("ok"))
+		w.Write([]byte("parsed " + len(outputs) + " records"))
 	}
 	return
 }
