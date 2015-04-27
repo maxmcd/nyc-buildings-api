@@ -6,18 +6,14 @@ var server    = restify.createServer({
 	},
 });
 
-var fs        = require("fs");
-var path      = require("path");
-var Sequelize = require("sequelize");
-var env       = process.env.NODE_ENV || "development";
-var config, sequelize;
-if (env == "production") {
-	console.log(process.env.NYCBDB)
-	sequelize = new Sequelize("postgres://" + process.env.NYCBDB);
-} else {
-	config    = require(__dirname + '/config/config.json')[env];
-	sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+var fs        = require('fs');
+var http      = require('http');
+var request   = require('urllib-sync').request;
+var path      = require('path');
+var Sequelize = require('sequelize');
+var env       = process.env.NODE_ENV || 'development';
+var config    = require(__dirname + '/config/config.json')[env];
+var sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 // -----------------------------
 // Model definitions
@@ -135,8 +131,8 @@ server.get('/buildings/:bin', function(req, res) {
 	    	res.send(output);
 	    }
 			else {
-				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url);
+				var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
+				code = passUrlToScraper(url);
 				if (code != 200) {
 						res.status(code);
 						res.send();
@@ -154,119 +150,52 @@ server.get('/buildings/:bin', function(req, res) {
 server.get('/buildings/:bin/complaints', function(req, res) {
     var bin    = req.params.bin;
     var output = getBuilding_complaints(bin, function(output) {
+	    if (output.length > 0) {
+	    	res.status(200);
+	    	res.send(output);
+	    }
+			else {
+				var url = 'http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin;
+				passUrlToScraper(url, function(status_code) {
+					if (status_code != 200) {
+							res.status(status_code);
+							res.send();
+					} else {
+						var output = getBuilding_complaints(bin, function(output) {
+							res.status(200);
+							res.send(output);
+						})
+					}
+				});
+			}
+    });
+  }
+);
+
+server.get('/complaints/:complaint_num', function(req, res) {
+    var complaint_num = req.params.complaint_num;
+    var output        = getComplaint(complaint_num, function(output) {
 	    if (output) {
 	    	res.status(200);
 	    	res.send(output);
 	    }
 			else {
-				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url);
-				if (code != 200) {
-						res.status(code);
-						res.send();
-				} else {
-					var output = getBuilding_complaints(bin, function(output) {
-						res.status(200);
-						res.send(output);
-					})
-				}
+				var url = 'http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + complaint_num;
+				passUrlToScraper(url, function(status_code) {
+					if (status_code != 200) {
+							res.status(status_code);
+							res.send();
+					} else {
+						var output = getComplaint(bin, function(output) {
+							res.status(200);
+							res.send(output);
+						})
+					}
+				});
 			}
     });
   }
 );
-
-server.get('/complaint/:complaint_num', function(req, res) {
-    var complaint_num = req.params.complaint_num;
-    var output        = getComplaint(complaint_num, function(output) {
-	    if (output) {
-	    	res.send(output);
-	    }
-			else {
-				var url = '?link=' + encodeURIComponent('http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + bin);
-				code = passUrlToScraper("http://localhost:8001", url);
-				if (code != 200) {
-						res.status(code);
-						res.send();
-				} else {
-					var output = getBuilding_profile(bin, function(output) {
-						res.status(200);
-						res.send(output);
-					})
-				}
-			}
-    });
-  }
-);
-
-
-
-
-
-
-server.get('/create/building', function(req, res) {
-	Building.create({
-		'bbl'                        : '1008820021',
-		'bin'                        : '1018131',
-	  'health_area'                : '5300',
-	  'census_tract'               : '68',
-	  'community_board'            : '105',
-	  'buildings_on_lot'           : '1',
-	  'tax_block'                  : '882',
-	  'condo'                      : 'NO',
-	  'vacant'                     : 'NO',
-	  'cross_streets'              : 'East 26 Street, East 27 Street',
-	  'dob_special_place_name'     : '',
-	  'landmark_status'            : '',
-	  'local_law'                  : 'YES',
-	  'environmental_restrictions' : 'N/A',
-	  'legal_adult_use'            : 'NO',
-	  'loft_law'                   : 'NO',
-	  'special_status'             : 'N/A',
-	  'city_owned'                 : 'NO',
-	  'special_district'           : 'UNKNOWN',
-	  'complaints_total'           : '33',
-	  'complaints_open'            : '0',
-	  'violations_dob_total'       : '50',
-	  'violations_dob_open'        : '2',
-	  'violations_ecb_total'       : '14',
-	  'violations_ecb_open'        : '4'
-	}).then(function(building) {
-	  console.log(building.get({
-	    plain: true
-	  }))
-	}).then(function() {
-		res.send('Success - it was added');
-	});	
-})
-
-server.get('/create/complaint', function(req, res) {
-	Complaint.create({
-	  'bin'               : '1018131',
-	  'complaint_num'     : '1347014',
-	  'regarding'         : 'ELECTRICAL AND PLUMBING WORK INPROGRESS WITHOUT PERMITS INAPTS 11A-8G-4E-7G-2K-4L-9L.',
-	  'category'          : '66      PLUMBING WORK - ILLEGAL/NO PERMIT(ALSO SPRINKLER/STANDPIPE)',
-	  'assigned_to'       : 'PLUMBING DIVISION',
-	  'priority'          : 'B',
-	  'received'          : '04/17/2013',
-	  'block'             : '882',
-	  'lot'               : '21',
-	  'community_board'   : '105',
-	  'owner'             : '88 LEX OWNER 8, LLC',
-	  'last_inspection'   : '06/06/2013 - - BY BADGE # 2339',
-	  'disposition'       : '06/06/2013 - I2 - NO VIOLATION WARRANTED FOR COMPLAINT AT TIME OF INSPECTION',
-	  'dob_violation_num' : '',
-	  'ecb_violation_num' : '',
-	  'comments'          : 'NO ACTION NECESSARY',
-	}).then(function(building) {
-	  console.log(building.get({
-	    plain: true
-	  }))
-	}).then(function() {
-		res.send('Success - it was added');
-	});	
-})
-
-
 
 
 // -----------------------------
@@ -380,13 +309,57 @@ function getBuilding_complaints(bin, callback) {
 	});
 }
 
-function passUrlToScraper(url) {
-	try {
-		var res = request(url);
-		return res.status		
-	} catch (e) {
-		return 500
-	}
+function getComplaint(bin, callback) {
+	Complaint
+	.findOne({where:{bin:bin}})
+	.complete(function (err, data) {
+		var output = false;
+		if (data != null) {
+			var element = data.dataValues;
+			output = {
+				bin               : element.bin,
+				complaint_num     : element.complaint_num,
+				regarding         : element.regarding,
+				category          : element.category,
+				assigned_to       : element.assigned_to,
+				priority          : element.priority,
+				received          : element.received,
+				block             : element.block,
+				lot               : element.lot,
+				community_board   : element.community_board,
+				owner             : element.owner,
+				last_inspection   : element.last_inspection,
+				disposition       : element.disposition,
+				dob_violation_num : element.dob_violation_num,
+				ecb_violation_num : element.ecb_violation_num,
+				comments          : element.comments,
+			}
+		}
+		return callback(output);
+	});
+}
+
+function passUrlToScraper(url, callback) {
+	var options = {
+	  host: '10.0.8.98',
+	  port: 8001,
+	  path: '/?link=' + encodeURIComponent(url),
+	  method: 'GET',
+	};
+
+	var status_code = 500;
+	var req = http.request(options, function(res) {
+		console.log('foo');
+		status_code = res.statusCode;
+		return callback(status_code);
+	});
+
+	req.on('error', function(e) {
+	  console.log('Problem with request: ' + e.message);
+	  return callback(status_code);
+	});
+
+	req.end();
 }
 
 
