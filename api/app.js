@@ -137,7 +137,7 @@ server.get('/buildings/:bin', function(req, res) {
 							res.status(status_code);
 							res.send();
 					} else {
-						var output = getBuilding_profile(bin, function(output) {
+						getBuilding_profile(bin, function(output) {
 							res.status(200);
 							res.send(output);
 						})
@@ -162,7 +162,7 @@ server.get('/buildings/:bin/complaints', function(req, res) {
 							res.status(status_code);
 							res.send();
 					} else {
-						var output = getBuilding_complaints(bin, function(output) {
+						getBuilding_complaints(bin, function(output) {
 							res.status(200);
 							res.send(output);
 						})
@@ -187,7 +187,7 @@ server.get('/complaints/:complaint_num', function(req, res) {
 							res.status(status_code);
 							res.send();
 					} else {
-						var output = getComplaint(bin, function(output) {
+						getComplaint(complaint_num, function(output) {
 							res.status(200);
 							res.send(output);
 						})
@@ -310,9 +310,9 @@ function getBuilding_complaints(bin, callback) {
 	});
 }
 
-function getComplaint(bin, callback) {
+function getComplaint(complaint_num, callback) {
 	Complaint
-	.findOne({where:{bin:bin}})
+	.findOne({where:{complaint_num:complaint_num}})
 	.complete(function (err, data) {
 		var output = false;
 		if (data != null) {
