@@ -50,6 +50,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		log.Println("error with jsonscrape: ", err.Error())
 		return
 	}
 
@@ -76,6 +77,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 	output := strings.Join(errors, ", ")
 	if len(output) > 0 {
 		w.Write([]byte(output))
+		log.Println("errors: ", output)
 	} else {
 		w.Write([]byte("ok"))
 	}

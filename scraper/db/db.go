@@ -126,7 +126,6 @@ func checkExistence(columns map[string]string, table string, identifier string) 
 		table + "\" WHERE \"" +
 		table + "\".\"" +
 		identifier + "\" = $1 LIMIT 1"
-	fmt.Println(query)
 	exec, err := db.Exec(query, columns[identifier])
 	if err != nil {
 		return false, err
