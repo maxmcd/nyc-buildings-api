@@ -45,11 +45,12 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("include a link"))
 		return
 	}
-	fmt.Println(link)
+
 	outputs, err := jsonscrape.GetOutputFromUrl(link, locations)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		log.Println("error with jsonscrape: ", err.Error())
 		return
 	}
 
@@ -76,8 +77,9 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 	output := strings.Join(errors, ", ")
 	if len(output) > 0 {
 		w.Write([]byte(output))
+		log.Println("errors: ", output)
 	} else {
-		w.Write([]byte("ok"))
+		w.Write([]byte(fmt.Sprintf("parsed %d records", len(outputs))))
 	}
 	return
 }
