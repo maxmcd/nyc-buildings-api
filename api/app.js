@@ -132,16 +132,17 @@ server.get('/buildings/:bin', function(req, res) {
 	    }
 			else {
 				var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
-				code = passUrlToScraper(url);
-				if (code != 200) {
-						res.status(code);
-						res.send();
-				} else {
-					var output = getBuilding_profile(bin, function(output) {
-						res.status(200);
-						res.send(output);
-					})
-				}
+				passUrlToScraper(url, function(status_code) {
+					if (status_code != 200) {
+							res.status(status_code);
+							res.send();
+					} else {
+						var output = getBuilding_profile(bin, function(output) {
+							res.status(200);
+							res.send(output);
+						})
+					}
+				});
 			}
     });
   }
@@ -341,15 +342,14 @@ function getComplaint(bin, callback) {
 
 function passUrlToScraper(url, callback) {
 	var options = {
-	  host: '10.0.8.98',
-	  port: 8001,
+	  host: '54.242.182.98',
+	  port: 80,
 	  path: '/?link=' + encodeURIComponent(url),
 	  method: 'GET',
 	};
 
 	var status_code = 500;
 	var req = http.request(options, function(res) {
-		console.log('foo');
 		status_code = res.statusCode;
 		return callback(status_code);
 	});
