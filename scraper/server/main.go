@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -78,7 +79,7 @@ func LinkHandler(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(output))
 		log.Println("errors: ", output)
 	} else {
-		w.Write([]byte("parsed " + len(outputs) + " records"))
+		w.Write([]byte(fmt.Sprintf("parsed %d records", len(outputs))))
 	}
 	return
 }
