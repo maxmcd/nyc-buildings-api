@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -12,8 +13,19 @@ import (
 var db *sql.DB
 
 func Connect() {
+	goEnv := os.Getenv("GO_ENV")
 	var err error
-	db, err = sql.Open("postgres", "dbname=nyc-buildings-api sslmode=disable")
+	if goEnv != "production" {
+		db, err = sql.Open(
+			"postgres",
+			"dbname=nyc-buildings-api sslmode=disable",
+		)
+	} else {
+		db, err = sql.Open(
+			"postgres",
+			"postgres://"+os.Getenv("NYCBDB")+"?sslmode=disable",
+		)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +84,7 @@ func (q *query) createQueryString(exists bool) (params []interface{}) {
 		q.ouput += strings.Join(markers, ", ")
 		q.ouput += ")"
 	}
-
+	fmt.Println(q.ouput)
 	return
 }
 
@@ -114,6 +126,7 @@ func checkExistence(columns map[string]string, table string, identifier string) 
 		table + "\" WHERE \"" +
 		table + "\".\"" +
 		identifier + "\" = $1 LIMIT 1"
+	fmt.Println(query)
 	exec, err := db.Exec(query, columns[identifier])
 	if err != nil {
 		return false, err

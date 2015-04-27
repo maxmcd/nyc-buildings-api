@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -142,13 +143,20 @@ func parseDirectivesWithDoc(doc *goquery.Document, directives []Directives) (out
 		} else if directive.Type == "form" {
 			urls = ReturnFormUrlsFromDoc(doc, directive.Items)
 		}
+
+		var wg sync.WaitGroup
 		for _, url := range urls {
-			linkOutput, err := GetOutputFromUrl(url, globalLocations)
-			if err != nil {
-				log.Println(err)
-			}
-			outputs = append(outputs, linkOutput...)
+			wg.Add(1)
+			go func(url string) {
+				linkOutput, err := GetOutputFromUrl(url, globalLocations)
+				if err != nil {
+					log.Println(err)
+				}
+				outputs = append(outputs, linkOutput...)
+				wg.Done()
+			}(url)
 		}
+		wg.Wait()
 
 		if directive.Type == "scrape" {
 			values := returnTableValuesFromDoc(doc, directive.Items)
