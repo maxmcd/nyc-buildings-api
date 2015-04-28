@@ -5,6 +5,7 @@ var server    = restify.createServer({
 		'application/json': jsonFormatter
 	},
 });
+server.pre(restify.pre.sanitizePath());
 
 var fs        = require('fs');
 var http      = require('http');
@@ -119,17 +120,18 @@ var ECB_Violation  = sequelize.define('ecb_violations', {
 // Endpoints
 // -----------------------------
 
+
 server.get('/', function(req, res) {
 	res.send('Hello world.')
 });
 
 server.get('/buildings/:bin', function(req, res) {
-    var bin    = req.params.bin;
-    var output = getBuilding_profile(bin, function(output) {
-	    if (output) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
+	var bin    = req.params.bin;
+	var output = getBuilding_profile(bin, function(output) {
+		if (output) {
+			res.status(200);
+			res.send(output);
+		}
 			else {
 				var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
 				passUrlToScraper(url, function(status_code) {
@@ -144,17 +146,17 @@ server.get('/buildings/:bin', function(req, res) {
 					}
 				});
 			}
-    });
+	});
   }
 );
 
 server.get('/buildings/:bin/complaints', function(req, res) {
-    var bin    = req.params.bin;
-    var output = getBuilding_complaints(bin, function(output) {
-	    if (output.length > 0) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
+	var bin    = req.params.bin;
+	var output = getBuilding_complaints(bin, function(output) {
+		if (output.length > 0) {
+			res.status(200);
+			res.send(output);
+		}
 			else {
 				var url = 'http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin;
 				passUrlToScraper(url, function(status_code) {
@@ -169,17 +171,119 @@ server.get('/buildings/:bin/complaints', function(req, res) {
 					}
 				});
 			}
-    });
+	});
+  }
+);
+
+server.get('/building/:bbl', function(req, res) {
+	var bbl = req.params.lot;
+
+	Building
+		.findOne({where:{bbl:bbl}})
+		.complete(function (err, data) {
+				res.send(data);
+			});
+  }
+);
+
+server.get('/another', function(req, res) {
+	Building.create({
+		"bbl": "1008820021",
+		"bin": "1018131",
+	  "health_area": "5300",
+	  "census_tract":"68",
+	  "community_board":"105",
+	  "buildings_on_lot":"1",
+	  "tax_block":"882",
+	  "condo":"NO",
+	  "vacant":"NO",
+	  "cross_streets":"EAST   26 STREET,   EAST   27 STREET",
+	  "dob_special_place_name":"",
+	  "landmark_status":"",
+	  "local_law":"YES",
+	  "environmental_restrictions":"N/A",
+	  "legal_adult_use":"NO",
+	  "loft_law":"NO",
+	  "special_status":"N/A",
+	  "city_owned":"NO",
+	  "special_district":"UNKNOWN",
+	  "complaints_total":"33",
+	  "complaints_open":"0",
+	  "violations_dob_total":"50",
+	  "violations_dob_open":"2",
+	  "violations_ecb_total":"14",
+	  "violations_ecb_open":"4"
+	}).then(function(building) {
+	  console.log(building.get({
+		plain: true
+	  }))
+	}).then(function() {
+		res.send('foo - it was added');
+	});	
+})
+
+server.get('/', function(req, res) {
+	res.send('Hello world.')
+});
+
+server.get('/buildings/:bin', function(req, res) {
+	var bin    = req.params.bin;
+	var output = getBuilding_profile(bin, function(output) {
+		console.log(output)
+		if (output) {
+			res.status(200);
+			res.send(output);
+		}
+			else {
+				var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
+				passUrlToScraper(url, function(status_code) {
+					if (status_code != 200) {
+							res.status(status_code);
+							res.send();
+					} else {
+						getBuilding_profile(bin, function(output) {
+							res.status(200);
+							res.send(output);
+						})
+					}
+				});
+			}
+	});
+  }
+);
+
+server.get('/buildings/:bin/complaints', function(req, res) {
+	var bin    = req.params.bin;
+	var output = getBuilding_complaints(bin, function(output) {
+		if (output.length > 0) {
+			res.status(200);
+			res.send(output);
+		}
+			else {
+				var url = 'http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin;
+				passUrlToScraper(url, function(status_code) {
+					if (status_code != 200) {
+							res.status(status_code);
+							res.send();
+					} else {
+						getBuilding_complaints(bin, function(output) {
+							res.status(200);
+							res.send(output);
+						})
+					}
+				});
+			}
+	});
   }
 );
 
 server.get('/complaints/:complaint_num', function(req, res) {
-    var complaint_num = req.params.complaint_num;
-    var output        = getComplaint(complaint_num, function(output) {
-	    if (output) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
+	var complaint_num = req.params.complaint_num;
+	var output        = getComplaint(complaint_num, function(output) {
+		if (output) {
+			res.status(200);
+			res.send(output);
+		}
 			else {
 				var url = 'http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + complaint_num;
 				passUrlToScraper(url, function(status_code) {
@@ -194,7 +298,7 @@ server.get('/complaints/:complaint_num', function(req, res) {
 					}
 				});
 			}
-    });
+	});
   }
 );
 
@@ -342,8 +446,10 @@ function getComplaint(complaint_num, callback) {
 
 function passUrlToScraper(url, callback) {
 	var options = {
-	  host: '54.242.182.98',
-	  port: 80,
+	  // host: '54.242.182.98',
+	  // port: 80,
+	  host: 'localhost',
+	  port: 8001,
 	  path: '/?link=' + encodeURIComponent(url),
 	  method: 'GET',
 	};
