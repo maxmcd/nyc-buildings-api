@@ -120,6 +120,7 @@ func WriteColumnsMapToTable(columns map[string]string, table string, identifier 
 }
 
 func checkExistence(columns map[string]string, table string, identifier string) (bool, error) {
+
 	query := "SELECT  \"" +
 		table + "\".* FROM \"" +
 		table + "\" WHERE \"" +
