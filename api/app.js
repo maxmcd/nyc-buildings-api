@@ -237,8 +237,8 @@ function jsonFormatter(req, res, body) {
 
 function getBuilding_profile(bin, callback) {
 	Building
-	.findOne({where:{bin:bin}})
-	.complete(function (err, data) {
+	.find({where:{bin:bin}})
+	.then(function (err, data) {
 		var output = false;
 		if (data != null) {
 			var element = data.dataValues;
@@ -312,8 +312,8 @@ function getBuilding_complaints(bin, callback) {
 
 function getComplaint(complaint_num, callback) {
 	Complaint
-	.findOne({where:{complaint_num:complaint_num}})
-	.complete(function (err, data) {
+	.find({where:{complaint_num:complaint_num}})
+	.then(function (err, data) {
 		var output = false;
 		if (data != null) {
 			var element = data.dataValues;
