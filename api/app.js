@@ -120,81 +120,83 @@ var ECB_Violation  = sequelize.define('ecb_violations', {
 // -----------------------------
 
 server.get('/', function(req, res) {
-	res.send('Hello world.')
+	res.send('Hello world.');
 });
 
-server.get('/buildings/:bin', function(req, res) {
-    var bin    = req.params.bin;
-    var output = getBuilding_profile(bin, function(output) {
-	    if (output) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
-			else {
-				var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
-				passUrlToScraper(url, function(status_code) {
-					if (status_code != 200) {
-							res.status(status_code);
-							res.send();
-					} else {
-						getBuilding_profile(bin, function(output) {
-							res.status(200);
-							res.send(output);
-						})
-					}
-				});
-			}
-    });
-  }
-);
+function handleApiRquest(params) {
+	var url = params.url, 
+		databaseQuery = params.databaseQuery, 
+		res = params.res, 
+		next = params.next, 
+		identifier = params.identifier;
+	databaseQuery(identifier, function(output) {
+		console.log(output);
+		if (output) {
+			res.send(200, output);
+		} else {
+			passUrlToScraper(url, function(scraperResponse) {
+				if (scraperResponse.statusCode !== 200) {
+					res.send(scraperResponse.statusCode, "error response from scraper");
+				} else {
+					databaseQuery(identifier, function(output) {
+						if (output) {
+							res.send(output);							
+						} else {
+							res.send(500, "error getting from db after successful reponse");
+						}
+					});
+				}
+			});
+		}
+	});
+}
 
-server.get('/buildings/:bin/complaints', function(req, res) {
-    var bin    = req.params.bin;
-    var output = getBuilding_complaints(bin, function(output) {
-	    if (output.length > 0) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
-			else {
-				var url = 'http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin;
-				passUrlToScraper(url, function(status_code) {
-					if (status_code != 200) {
-							res.status(status_code);
-							res.send();
-					} else {
-						getBuilding_complaints(bin, function(output) {
-							res.status(200);
-							res.send(output);
-						})
-					}
-				});
-			}
-    });
-  }
-);
+server.get('/buildings/:bin', function(req, res, next) {
+	var bin    = req.params.bin;
+	var url = 'http://a810-bisweb.nyc.gov/bisweb/PropertyProfileOverviewServlet?bin=' + bin;
+	handleApiRquest({
+		url: url, 
+		databaseQuery: getBuilding_profile, 
+		res: res, 
+		next: next, 
+		identifier: bin
+	});
+});
+
+server.get('/buildings/:bin/complaints', function(req, res, next) {
+	var bin    = req.params.bin;
+	var url = 'http://a810-bisweb.nyc.gov/bisweb/ComplaintsByAddressServlet?allbin=' + bin;
+	handleApiRquest({
+		url: url, 
+		databaseQuery: getBuilding_complaints, 
+		res: res, 
+		next: next, 
+		identifier: bin
+	});
+ });
 
 server.get('/complaints/:complaint_num', function(req, res) {
-    var complaint_num = req.params.complaint_num;
-    var output        = getComplaint(complaint_num, function(output) {
-	    if (output) {
-	    	res.status(200);
-	    	res.send(output);
-	    }
-			else {
-				var url = 'http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + complaint_num;
-				passUrlToScraper(url, function(status_code) {
-					if (status_code != 200) {
-							res.status(status_code);
-							res.send();
-					} else {
-						getComplaint(complaint_num, function(output) {
-							res.status(200);
-							res.send(output);
-						})
-					}
-				});
-			}
-    });
+	var complaint_num = req.params.complaint_num;
+	var output        = getComplaint(complaint_num, function(output) {
+		if (output) {
+			res.status(200);
+			res.send(output);
+		}
+		else {
+			var url = 'http://a810-bisweb.nyc.gov/bisweb/OverviewForComplaintServlet?vlcompdetlkey=' + complaint_num;
+			passUrlToScraper(url, function(status_code) {
+				if (status_code != 200) {
+						res.status(status_code);
+						res.send();
+				} else {
+					getComplaint(complaint_num, function(output) {
+						res.status(200);
+						res.send(output);
+					});
+				}
+			});
+		}
+	});
   }
 );
 
@@ -238,9 +240,9 @@ function jsonFormatter(req, res, body) {
 function getBuilding_profile(bin, callback) {
 	Building
 	.find({where:{bin:bin}})
-	.then(function (err, data) {
+	.then(function (data) {
 		var output = false;
-		if (data != null) {
+		if (data !== null) {
 			var element = data.dataValues;
 			output = {
 				bin                        : element.bin,
@@ -271,7 +273,7 @@ function getBuilding_profile(bin, callback) {
 					ecb_total                : element.violations_ecb_total,
 					ecb_open                 : element.violations_ecb_open,
 				},
-			}
+			};
 		}
 		return callback(output);
 	});
@@ -280,9 +282,9 @@ function getBuilding_profile(bin, callback) {
 function getBuilding_complaints(bin, callback) {
 	Complaint
 	.findAll({where:{bin:bin}})
-	.complete(function (err, data) {
+	.then(function (data) {
 		var output_list = [];
-		if (data != null) {
+		if (data !== null) {
 			for (var i = 0; i < data.length; i ++) {
 				var element = data[i].dataValues;
 				output = {
@@ -302,9 +304,12 @@ function getBuilding_complaints(bin, callback) {
 					dob_violation_num : element.dob_violation_num,
 					ecb_violation_num : element.ecb_violation_num,
 					comments          : element.comments,
-				}
+				};
 				output_list.push(output);
 			}
+		}
+		if (output_list.length == 0) {
+			output_list = false;
 		}
 		return callback(output_list);
 	});
@@ -313,9 +318,9 @@ function getBuilding_complaints(bin, callback) {
 function getComplaint(complaint_num, callback) {
 	Complaint
 	.find({where:{complaint_num:complaint_num}})
-	.then(function (err, data) {
+	.then(function (data) {
 		var output = false;
-		if (data != null) {
+		if (data !== null) {
 			var element = data.dataValues;
 			output = {
 				bin               : element.bin,
@@ -334,7 +339,7 @@ function getComplaint(complaint_num, callback) {
 				dob_violation_num : element.dob_violation_num,
 				ecb_violation_num : element.ecb_violation_num,
 				comments          : element.comments,
-			}
+			};
 		}
 		return callback(output);
 	});
@@ -350,13 +355,13 @@ function passUrlToScraper(url, callback) {
 
 	var status_code = 500;
 	var req = http.request(options, function(res) {
-		status_code = res.statusCode;
-		return callback(status_code);
+		// status_code = res.statusCode;
+		return callback(res);
 	});
 
 	req.on('error', function(e) {
-	  console.log('Problem with request: ' + e.message);
-	  return callback(status_code);
+		console.log('Problem with request: ' + e.message);
+		return callback(e);
 	});
 
 	req.end();
