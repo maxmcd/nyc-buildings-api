@@ -55,3 +55,17 @@ If we want to scrape information from archive.org, a few guidelines:
 	 - If you don't want to return the Wayback Machine header append `id_` to `most-recent-timestap`
 	 - `most-recent-timestamp` self-corrects. You can just pass a very recent timestamp
 	 - Example of a well formatteed query: http://web.archive.org/web/20100607134616id_/http://a810-bisweb.nyc.gov/bisweb
+	
+
+### NYC DOB
+```
+New York City Department of Buildings
+280 Broadway, 7th Floor
+New York, NY 10007
+```
+
+ - BIS Desk phone number: (212) 393-2260
+ - Records Access Officer for the DOB: Angela White
+	 + Phone number might be:
+		 * (212) 566-2899
+		 * (212) 566-5000
